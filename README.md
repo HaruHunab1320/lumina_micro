@@ -64,6 +64,17 @@ LUMINA_MICRO_COLD_FIRST=1 \
 bash tools/run_bench_demo.sh
 ```
 
+Public eval scaffolding:
+
+```bash
+bash tools/run_public_eval_builder.sh
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_prompt.sh
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
+bash tools/run_public_eval_aggregate.sh
+```
+
+For plumbing checks only, you can set `LUMINA_MICRO_EVAL_BACKEND=mock` for the prompt/runtime commands. Public comparisons should use the Ollama path.
+
 ## Important limitation
 
 This is a real runnable standalone candidate, but it still preserves one architectural limitation from the current project:

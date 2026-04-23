@@ -217,9 +217,9 @@ The exact implementation can change, but the public shape should be close to:
 
 ```bash
 bash tools/run_public_eval_builder.sh
-bash tools/run_public_eval_prompt.sh
-bash tools/run_public_eval_runtime.sh
-python -m lumina_micro.eval.aggregate_public_results
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_prompt.sh
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
+bash tools/run_public_eval_aggregate.sh
 ```
 
 The important point is not the filenames. The important point is that the comparison is explicit, reproducible, and side-by-side.

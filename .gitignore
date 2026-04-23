@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+artifacts/public_eval_*.json
+artifacts/public_eval_*.md
