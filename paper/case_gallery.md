@@ -131,14 +131,88 @@ Why rejected:
 - tests passed: `false`
 - reason: the contract requires preserving the original item as the value; this candidate drops fields and changes value semantics
 
-## 4. What these examples show
+## 4. `public_eval_v2` examples
 
-The failure boundary is usually not “the model did something random.”
+These examples come from the current public comparison slice rather than the frozen historical runs.
+
+### A. Prompt-only failure on accumulator reduce
+
+Row: `acc_h`
+
+Input:
+
+```js
+let teamKeyChars = 0;
+for (const member of members) {
+  teamKeyChars += `${member.team.slug}:${member.profile.handle.trim().toLowerCase()}`.length;
+}
+```
+
+`builder_only` candidate:
+
+```js
+const teamKeyChars = members.reduce((acc, member) => acc + `${member.team.slug}:${member.profile.handle.trim().toLowerCase()}`.length, 0);
+```
+
+`prompt_only` candidate:
+
+```js
+const teamKeyChars = members.reduce((acc, member) => acc + (${member.team.slug}:${member.profile.handle.trim().toLowerCase()}).length, 0);
+```
+
+Observed behavior:
+
+- `builder_only`: passes
+- `prompt_only`: fails syntax
+- `runtime_gated`: rejects the same prompt candidate and falls back
+
+Why this matters:
+
+- the failure is not semantic uncertainty
+- it is a concrete syntax break introduced by the model in a templated-string expression
+- the runtime does not repair it; it simply refuses to accept it
+
+### B. Prompt-only failure on object-index reduce
+
+Row: `idx_h`
+
+Input:
+
+```js
+const invoicesByOwnerEmail = {};
+for (const invoice of invoices) {
+  invoicesByOwnerEmail[invoice.customer.account.owner.email.trim().toLowerCase()] = invoice;
+}
+```
+
+`prompt_only` candidate:
+
+```js
+const invoicesByOwnerEmail = invoices.reduce((acc, invoice) => { acc[invoice.customer.account.owner.email.trim().toLowerCase()] = invoice;
+```
+
+Observed behavior:
+
+- syntax valid: `false`
+- required construct present: `true`
+- verifier pass: `false`
+- runtime action: fallback
+
+Why this matters:
+
+- the model is very close structurally
+- but an incomplete block body is enough to make the rewrite unsafe
+- verifier-backed rejection is doing real work here
+
+## 5. What these examples show
+
+The failure boundary is usually not "the model did something random."
 
 It is more specific:
 
 - omitted binding
-- wrong output shape
+- malformed template-string expression
+- incomplete reduce block body
 - subtle semantic drift while still looking structurally plausible
 
 That is exactly why the verifier-backed contract is necessary. Textual plausibility is not enough.

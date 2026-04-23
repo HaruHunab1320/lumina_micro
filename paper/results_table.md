@@ -58,47 +58,59 @@ Packaged local benchmark on Mac with Ollama (`llama3.1:latest`):
 
 This validates the local runtime path, not true adapter-swapping deployment.
 
-## E. Public comparison table shape
+## E. Public comparison snapshot (`public_eval_v2`)
 
-The next public evaluation should report a side-by-side comparison for each contract across:
+`public_eval_v2` is the first public slice that creates some separation between deterministic rewriting, prompt-only generation, and verifier-gated acceptance.
+
+Important boundary:
+
+- `runtime_gated` now applies thresholding to the same candidate emitted by `prompt_only`
+- it is not allowed to take a second stochastic model sample
+- this makes the comparison fairer and easier to interpret
+
+| Contract | Arm | n | Syntax valid | Pass rate | Coverage | Selective accuracy | Overall accuracy | Fallback rate | Threshold |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `js_array_loop_to_map` | `builder_only` | `4` | `1.000` | `1.000` | `1.000` | `1.000` | `1.000` | `0.000` | `n/a` |
+| `js_array_loop_to_map` | `prompt_only` | `4` | `1.000` | `1.000` | `1.000` | `1.000` | `1.000` | `0.000` | `n/a` |
+| `js_array_loop_to_map` | `runtime_gated` | `4` | `1.000` | `1.000` | `1.000` | `1.000` | `1.000` | `0.000` | `0.30` |
+| `js_reduce_accumulator_refactor` | `builder_only` | `4` | `1.000` | `1.000` | `1.000` | `1.000` | `1.000` | `0.000` | `n/a` |
+| `js_reduce_accumulator_refactor` | `prompt_only` | `4` | `0.500` | `0.500` | `1.000` | `0.500` | `0.500` | `0.000` | `n/a` |
+| `js_reduce_accumulator_refactor` | `runtime_gated` | `4` | `0.500` | `0.500` | `0.500` | `1.000` | `0.500` | `0.500` | `0.40` |
+| `js_reduce_object_index_builder` | `builder_only` | `4` | `1.000` | `1.000` | `1.000` | `1.000` | `1.000` | `0.000` | `n/a` |
+| `js_reduce_object_index_builder` | `prompt_only` | `4` | `0.750` | `0.750` | `1.000` | `0.750` | `0.750` | `0.000` | `n/a` |
+| `js_reduce_object_index_builder` | `runtime_gated` | `4` | `0.750` | `0.750` | `0.750` | `1.000` | `0.750` | `0.250` | `0.50` |
+
+What this snapshot supports:
+
+- deterministic contract logic remains a very strong baseline on these narrow tasks
+- prompt-only generation is meaningfully weaker on some reduce/object-index rows
+- runtime gating does not improve overall accuracy on this slice
+- but it does convert lower-precision prompt behavior into high-precision selective acceptance on the rows it keeps
+
+What this snapshot does not support:
+
+- broad model superiority over deterministic rewriting
+- a claim that the runtime already beats every simpler baseline on all metrics
+
+## F. Public comparison table shape
+
+The repo now includes a runnable public comparison harness covering:
 
 - `builder_only`
 - `prompt_only`
 - `runtime_gated`
 
-Suggested table:
+The command surface is:
 
-| Contract | Arm | n | Routed | Syntax valid | Required construct | Pass rate | Coverage | Selective accuracy | Overall accuracy | Fallback rate | Threshold |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `js_array_loop_to_map` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_array_loop_to_map` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_array_loop_to_map` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
-| `js_reduce_accumulator_refactor` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_reduce_accumulator_refactor` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_reduce_accumulator_refactor` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
-| `js_reduce_object_index_builder` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_reduce_object_index_builder` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
-| `js_reduce_object_index_builder` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
+```bash
+bash tools/run_public_eval_builder.sh
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_prompt.sh
+LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
+bash tools/run_public_eval_aggregate.sh
+```
 
-Notes:
-
-- `coverage` for `builder_only` and `prompt_only` should normally be `1.000` if they always emit a candidate.
-- `selective_accuracy` for non-gated arms collapses to ordinary pass rate.
-- `runtime_gated` is the only arm where thresholding and fallback behavior are meaningful.
-
-## F. Why this table matters
-
-This table is the minimum comparison needed to make the repo legible to an outside reader.
-
-It separates three different sources of performance:
+The comparison table remains the minimum surface needed to make the repo legible to an outside reader because it separates:
 
 - deterministic contract logic
 - plain model prompting
 - structured verifier-gated runtime behavior
-
-Without this comparison, the repo can be misread as either:
-
-- just deterministic rewriting with verification, or
-- just a prompt-engineering demo
-
-The public harness should make the contribution boundary explicit.
