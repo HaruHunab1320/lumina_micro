@@ -1,6 +1,9 @@
+import json
+import math
 import subprocess
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 from lumina_micro.runtime.contracts import get_contract_spec
@@ -294,6 +297,14 @@ def _postprocess_candidate(contract: str, text: str, row: dict) -> str:
     return _postprocess_index_candidate(text, row)
 
 
+def _feature_vector(contract: str, row: dict, candidate: str, route_confidence: float, verdict) -> list[float]:
+    if contract == "js_array_loop_to_map":
+        return _map_feature_vector(row, candidate, route_confidence, verdict)
+    if contract == "js_reduce_accumulator_refactor":
+        return _reduce_feature_vector(row, candidate, route_confidence, verdict)
+    return _index_feature_vector(row, candidate, route_confidence, verdict)
+
+
 def _score_candidate(contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
     if contract == "js_array_loop_to_map":
         return _map_heuristic_confidence(_map_feature_vector(row, candidate, route_confidence, verdict))
@@ -302,8 +313,55 @@ def _score_candidate(contract: str, route_confidence: float, row: dict, candidat
     return _index_heuristic_confidence(_index_feature_vector(row, candidate, route_confidence, verdict))
 
 
+class ConfidenceProvider(Protocol):
+    def score(self, contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
+        ...
+
+
+class HeuristicConfidenceProvider:
+    def score(self, contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
+        return _score_candidate(contract, route_confidence, row, candidate, verdict)
+
+
+class LinearConfidenceProvider:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    @classmethod
+    def from_path(cls, path: str | Path) -> 'LinearConfidenceProvider':
+        payload = json.loads(Path(path).read_text(encoding='utf-8'))
+        return cls(payload)
+
+    def score(self, contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
+        features = _feature_vector(contract, row, candidate, route_confidence, verdict)
+        spec = self.payload.get('contracts', {}).get(contract)
+        if spec is None:
+            raise KeyError(f'No confidence weights found for contract: {contract}')
+        weights = spec.get('weights', [])
+        bias = spec.get('bias', 0.0)
+        if len(weights) != len(features):
+            raise ValueError(
+                f'Feature/weight length mismatch for {contract}: {len(features)} features vs {len(weights)} weights'
+            )
+        logit = bias + sum(w * x for w, x in zip(weights, features, strict=True))
+        return 1.0 / (1.0 + math.exp(-logit))
+
+
+def build_confidence_provider(kind: str = 'heuristic', model_path: str | None = None) -> ConfidenceProvider:
+    if kind == 'heuristic':
+        return HeuristicConfidenceProvider()
+    if kind == 'linear':
+        if not model_path:
+            raise ValueError('confidence model path is required for linear provider')
+        return LinearConfidenceProvider.from_path(model_path)
+    raise ValueError(f'Unsupported confidence provider: {kind}')
+
+
 class MockSpecialistBackend:
     """Contract-matched stand-in for the future shared-base adapter runtime."""
+
+    def __init__(self, confidence_provider: ConfidenceProvider | None = None) -> None:
+        self.confidence_provider = confidence_provider or HeuristicConfidenceProvider()
 
     def run(self, request: SpecialistRequest) -> ExecutionResult:
         result = execute_contract(request.contract, request.input_code)
@@ -322,7 +380,7 @@ class MockSpecialistBackend:
             verifier = VERIFIERS[request.contract]
             row = result.details.get("verifier_row", {})
             verdict = verifier(result.generated_code, row)
-            result.answer_confidence = _score_candidate(
+            result.answer_confidence = self.confidence_provider.score(
                 request.contract,
                 request.route_confidence,
                 row,
@@ -333,9 +391,10 @@ class MockSpecialistBackend:
 
 
 class SharedBaseOllamaBackend:
-    def __init__(self, model: str = "llama3.1:latest", keepalive: str = "5m") -> None:
+    def __init__(self, model: str = "llama3.1:latest", keepalive: str = "5m", confidence_provider: ConfidenceProvider | None = None) -> None:
         self.model = model
         self.keepalive = keepalive
+        self.confidence_provider = confidence_provider or HeuristicConfidenceProvider()
 
     def _run_ollama(self, prompt: str) -> str:
         proc = subprocess.run(
@@ -363,7 +422,7 @@ class SharedBaseOllamaBackend:
         verdict = verifier(candidate, context.verifier_row)
         contract_marker_present = bool(getattr(verdict, "uses_map", getattr(verdict, "uses_reduce", False)))
         verified = bool(verdict.passed)
-        confidence = _score_candidate(request.contract, request.route_confidence, context.verifier_row, candidate, verdict)
+        confidence = self.confidence_provider.score(request.contract, request.route_confidence, context.verifier_row, candidate, verdict)
         return ExecutionResult(
             generated_code=candidate.strip(),
             verified=verified,

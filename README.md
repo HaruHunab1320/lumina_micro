@@ -77,6 +77,16 @@ For plumbing checks only, you can set `LUMINA_MICRO_EVAL_BACKEND=mock` for the p
 
 The current public comparison slice is `examples/public_eval_v2.jsonl`. The older `public_eval_v1.jsonl` remains an easy smoke slice.
 
+You can also swap the runtime confidence source without changing the eval matrix:
+
+```bash
+LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic
+LUMINA_MICRO_CONFIDENCE_PROVIDER=linear \
+LUMINA_MICRO_CONFIDENCE_MODEL=artifacts/example_linear_confidence_model.json
+```
+
+The `linear` path is the first file-backed hook for swapping persisted research heads into the same public eval surface. The shipped example model is only a schema/example, not a promoted research head.
+
 ## Important limitation
 
 This is a real runnable standalone candidate, but it still preserves one architectural limitation from the current project:

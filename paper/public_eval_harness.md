@@ -218,7 +218,30 @@ A public comparison release should include:
 - one command that aggregates the final comparison table
 - several success and failure examples per contract
 
-## 10. Suggested command surface
+## 10. Confidence-provider hook
+
+The public eval matrix now has an explicit confidence-provider seam.
+
+That seam exists so the comparison surface can stay fixed while the runtime internals improve:
+
+- current local runtime default: heuristic confidence
+- next upgrade: file-backed learned confidence heads
+- later upgrade: direct loading of persisted research heads
+
+The immediate public requirement is simple:
+
+- changing the confidence source must not change the eval harness shape
+- the same held-out rows and the same three arms must still run
+- any claim improvement should come from swapping a better confidence provider into the same matrix
+
+Current command-level knobs:
+
+- `LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic|linear`
+- `LUMINA_MICRO_CONFIDENCE_MODEL=/path/to/model.json`
+
+The repository includes `artifacts/example_linear_confidence_model.json` as a schema/example for the file-backed path.
+
+## 11. Suggested command surface
 
 The exact implementation can change, but the public shape should be close to:
 

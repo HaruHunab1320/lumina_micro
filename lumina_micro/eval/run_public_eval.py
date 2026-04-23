@@ -9,6 +9,7 @@ from lumina_micro.runtime.specialists import (
     MockSpecialistBackend,
     OllamaSpecialistBackend,
     SpecialistRequest,
+    build_confidence_provider,
 )
 
 ARMS = ("builder_only", "prompt_only", "runtime_gated")
@@ -29,11 +30,12 @@ def _load_summary_rows(path: Path) -> dict[str, dict[str, Any]]:
     return {row["id"]: row for row in payload["rows"]}
 
 
-def _make_backend(name: str, model: str, keepalive: str):
+def _make_backend(name: str, model: str, keepalive: str, confidence_provider: str, confidence_model: str | None):
+    provider = build_confidence_provider(confidence_provider, confidence_model)
     if name == "mock":
-        return MockSpecialistBackend()
+        return MockSpecialistBackend(confidence_provider=provider)
     if name == "ollama":
-        return OllamaSpecialistBackend(model=model, keepalive=keepalive)
+        return OllamaSpecialistBackend(model=model, keepalive=keepalive, confidence_provider=provider)
     raise ValueError(f"Unsupported backend: {name}")
 
 
@@ -141,8 +143,8 @@ def _builder_row(contract: str, input_code: str) -> dict[str, Any]:
     }
 
 
-def _prompt_row(contract: str, input_code: str, backend_name: str, model: str, keepalive: str) -> dict[str, Any]:
-    backend = _make_backend(backend_name, model, keepalive)
+def _prompt_row(contract: str, input_code: str, backend_name: str, model: str, keepalive: str, confidence_provider: str, confidence_model: str | None) -> dict[str, Any]:
+    backend = _make_backend(backend_name, model, keepalive, confidence_provider, confidence_model)
     result = backend.run(SpecialistRequest(contract=contract, input_code=input_code, route_confidence=1.0))
     return {
         "generated_code": result.generated_code,
@@ -160,8 +162,8 @@ def _prompt_row(contract: str, input_code: str, backend_name: str, model: str, k
     }
 
 
-def _runtime_row(contract: str, input_code: str, backend_name: str, model: str, keepalive: str) -> dict[str, Any]:
-    backend = _make_backend(backend_name, model, keepalive)
+def _runtime_row(contract: str, input_code: str, backend_name: str, model: str, keepalive: str, confidence_provider: str, confidence_model: str | None) -> dict[str, Any]:
+    backend = _make_backend(backend_name, model, keepalive, confidence_provider, confidence_model)
     result = backend.run(SpecialistRequest(contract=contract, input_code=input_code, route_confidence=1.0))
     return _runtime_row_from_payload(contract, {
         "generated_code": result.generated_code,
@@ -200,11 +202,13 @@ def _runtime_row_from_payload(contract: str, payload: dict[str, Any]) -> dict[st
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run public eval for one comparison arm.")
     parser.add_argument("--arm", choices=ARMS, required=True)
-    parser.add_argument("--input", type=Path, default=Path("examples/public_eval_v1.jsonl"))
+    parser.add_argument("--input", type=Path, default=Path("examples/public_eval_v2.jsonl"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--backend", choices=["mock", "ollama"], default=None)
     parser.add_argument("--ollama-model", default="llama3.1:latest")
     parser.add_argument("--ollama-keepalive", default="5m")
+    parser.add_argument("--confidence-provider", choices=["heuristic", "linear"], default="heuristic")
+    parser.add_argument("--confidence-model", default=None)
     parser.add_argument("--reuse-from", type=Path, default=None)
     args = parser.parse_args()
 
@@ -218,13 +222,13 @@ def main() -> None:
             payload = _builder_row(contract, input_code)
         elif args.arm == "prompt_only":
             backend_name = args.backend or "ollama"
-            payload = _prompt_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive)
+            payload = _prompt_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive, args.confidence_provider, args.confidence_model)
         else:
             if reused is not None and row["id"] in reused:
                 payload = _runtime_row_from_payload(contract, reused[row["id"]])
             else:
                 backend_name = args.backend or "ollama"
-                payload = _runtime_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive)
+                payload = _runtime_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive, args.confidence_provider, args.confidence_model)
         results.append({"id": row["id"], "contract": contract, "prompt": row.get("prompt"), **payload})
 
     summary = _summarize(args.arm, results)
