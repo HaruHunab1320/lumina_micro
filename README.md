@@ -98,6 +98,7 @@ This repo is shareable now, with one important boundary:
 2. `paper/results_table.md`
 3. `paper/appendix_methods.md`
 4. `paper/case_gallery.md`
+5. `paper/public_eval_harness.md`
 
 ## License
 

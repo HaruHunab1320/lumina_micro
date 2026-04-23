@@ -57,3 +57,48 @@ Packaged local benchmark on Mac with Ollama (`llama3.1:latest`):
 | Local model footprint | `5.9 GB` |
 
 This validates the local runtime path, not true adapter-swapping deployment.
+
+## E. Public comparison table shape
+
+The next public evaluation should report a side-by-side comparison for each contract across:
+
+- `builder_only`
+- `prompt_only`
+- `runtime_gated`
+
+Suggested table:
+
+| Contract | Arm | n | Routed | Syntax valid | Required construct | Pass rate | Coverage | Selective accuracy | Overall accuracy | Fallback rate | Threshold |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `js_array_loop_to_map` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_array_loop_to_map` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_array_loop_to_map` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
+| `js_reduce_accumulator_refactor` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_reduce_accumulator_refactor` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_reduce_accumulator_refactor` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
+| `js_reduce_object_index_builder` | `builder_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_reduce_object_index_builder` | `prompt_only` | — | — | — | — | — | `1.000` | same as pass | same as pass | `0.000` | `n/a` |
+| `js_reduce_object_index_builder` | `runtime_gated` | — | — | — | — | — | — | — | — | — | — |
+
+Notes:
+
+- `coverage` for `builder_only` and `prompt_only` should normally be `1.000` if they always emit a candidate.
+- `selective_accuracy` for non-gated arms collapses to ordinary pass rate.
+- `runtime_gated` is the only arm where thresholding and fallback behavior are meaningful.
+
+## F. Why this table matters
+
+This table is the minimum comparison needed to make the repo legible to an outside reader.
+
+It separates three different sources of performance:
+
+- deterministic contract logic
+- plain model prompting
+- structured verifier-gated runtime behavior
+
+Without this comparison, the repo can be misread as either:
+
+- just deterministic rewriting with verification, or
+- just a prompt-engineering demo
+
+The public harness should make the contribution boundary explicit.

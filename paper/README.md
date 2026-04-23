@@ -11,6 +11,7 @@ Supporting audit documents:
 - `appendix_methods.md`
 - `results_table.md`
 - `case_gallery.md`
+- `public_eval_harness.md`
 
 This note is intentionally scoped as a technical report, not a polished publication draft. It records:
 
