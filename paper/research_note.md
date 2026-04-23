@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This note documents the current validated result behind the Lumina micro-specialist demo. The central claim is narrow: for small, contract-specific code transformation tasks, a verifier-backed specialist can outperform a general base model, and a contract-specific confidence signal can support stable selective control. We test this claim on three JavaScript loop refactor contracts: loop-to-`map`, scalar-accumulator-to-`reduce`, and object-index-builder-to-`reduce`. Across all three, contract-matched specialists improved pass rates over the base model and supported stable thresholded acceptance policies. We then packaged the promoted specialists into a local runtime that decomposes a prompt, routes transformable spans, verifies each rewrite, applies threshold gating, and composes the final output. The result validates a narrow architecture pattern for local code transformation, not universal confidence or broad specialist routing.
+This note documents the current validated result behind the Lumina micro-specialist demo. The central claim is narrow: for small, contract-specific code transformation tasks, a verifier-backed specialist can outperform a general base model, and a contract-specific confidence signal can support stable selective control. We test this claim on three JavaScript loop refactor contracts: loop-to-`map`, scalar-accumulator-to-`reduce`, and object-index-builder-to-`reduce`. Across all three, contract-matched specialists improved pass rates over the base model and supported stable thresholded acceptance policies. We then packaged the promoted specialists into a local runtime that decomposes a prompt, routes transformable spans, verifies each rewrite, applies threshold gating, and composes the final output. The result validates a narrow architecture pattern for local code transformation, not universal confidence or broad specialist routing. A newer public comparison surface (`public_eval_v2`) also clarifies that the current strongest external claim is about verifier-gated selective acceptance relative to prompt-only generation, not broad superiority over deterministic rewriting.
 
 ## 1. Problem
 
@@ -129,6 +129,45 @@ prompt -> span extraction -> routing -> specialist generation -> verification ->
 
 It does not validate the final deployment architecture. The local demo currently runs through a single Ollama backend and uses runtime heuristics shaped by the frozen contracts rather than loading the persisted research heads directly.
 
+### 4.4 Public comparison surface (`public_eval_v2`)
+
+The repo now includes a runnable public comparison harness across three arms:
+
+- `builder_only`
+- `prompt_only`
+- `runtime_gated`
+
+Important comparison rule:
+
+- `runtime_gated` applies thresholding to the same candidate emitted by `prompt_only`
+- it is not allowed to take a second stochastic model sample
+
+This makes the comparison easier to interpret: the runtime arm tests gating and fallback, not a second chance to generate a different answer.
+
+Current `public_eval_v2` snapshot:
+
+- `js_array_loop_to_map`
+  - `builder_only`: pass `1.000`
+  - `prompt_only`: pass `1.000`
+  - `runtime_gated`: coverage `1.000`, selective accuracy `1.000`
+- `js_reduce_accumulator_refactor`
+  - `builder_only`: pass `1.000`
+  - `prompt_only`: pass `0.500`
+  - `runtime_gated`: coverage `0.500`, selective accuracy `1.000`, overall accuracy `0.500`
+- `js_reduce_object_index_builder`
+  - `builder_only`: pass `1.000`
+  - `prompt_only`: pass `0.750`
+  - `runtime_gated`: coverage `0.750`, selective accuracy `1.000`, overall accuracy `0.750`
+
+What this public surface supports:
+
+- deterministic contract logic is currently a very strong baseline
+- prompt-only generation is weaker on some reduce/object-index rows
+- runtime gating improves precision by refusing unsafe outputs
+- runtime gating does not currently exceed deterministic rewriting on this slice
+
+That is a narrower but more defensible public claim than the earlier internal framing.
+
 ## 5. Main Findings
 
 ### 5.1 What is validated
@@ -137,6 +176,7 @@ It does not validate the final deployment architecture. The local demo currently
 - Contract-matched target shape matters as much as model family.
 - Contract-specific confidence can support stable selective control when it is trained on meaningful positives and negatives.
 - A local runtime can compose several such specialists into one prompt-to-response flow.
+- On the current public comparison surface, verifier-gated runtime behavior is most defensible as a precision/safety mechanism relative to prompt-only generation.
 
 ### 5.2 What is not validated
 
@@ -180,5 +220,11 @@ The most valuable next step is not more blind specialist proliferation. It is ti
 The strongest conclusion is narrow but real:
 
 For small verifier-backed code transformation contracts, micro-specialists with contract-specific confidence are a workable local architecture pattern.
+
+The current public evidence is best understood this way:
+
+- deterministic rewriting is a strong baseline on narrow contracts
+- prompt-only generation is weaker on some held-out reduce/object-index rows
+- verifier-gated runtime behavior is valuable because it can reject unsafe outputs and preserve high precision on accepted rewrites
 
 This is not a result about universal confidence or general modular intelligence. It is a concrete result about how to build a local code system that can decide when a narrow transformation is good enough to keep.
