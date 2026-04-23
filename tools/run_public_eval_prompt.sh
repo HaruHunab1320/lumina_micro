@@ -4,7 +4,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 python -m lumina_micro.eval.run_public_eval \
   --arm prompt_only \
-  --input "${LUMINA_MICRO_PUBLIC_EVAL_INPUT:-examples/public_eval_v1.jsonl}" \
+  --input "${LUMINA_MICRO_PUBLIC_EVAL_INPUT:-examples/public_eval_v2.jsonl}" \
   --output "${LUMINA_MICRO_PUBLIC_EVAL_PROMPT_OUTPUT:-artifacts/public_eval_prompt.json}" \
   --backend "${LUMINA_MICRO_EVAL_BACKEND:-ollama}" \
   --ollama-model "${LUMINA_MICRO_OLLAMA_MODEL:-llama3.1:latest}" \

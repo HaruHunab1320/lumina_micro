@@ -75,6 +75,8 @@ bash tools/run_public_eval_aggregate.sh
 
 For plumbing checks only, you can set `LUMINA_MICRO_EVAL_BACKEND=mock` for the prompt/runtime commands. Public comparisons should use the Ollama path.
 
+The current public comparison slice is `examples/public_eval_v2.jsonl`. The older `public_eval_v1.jsonl` remains an easy smoke slice.
+
 ## Important limitation
 
 This is a real runnable standalone candidate, but it still preserves one architectural limitation from the current project:

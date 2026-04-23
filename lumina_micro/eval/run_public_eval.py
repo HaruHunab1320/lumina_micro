@@ -24,6 +24,11 @@ def _load_rows(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _load_summary_rows(path: Path) -> dict[str, dict[str, Any]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {row["id"]: row for row in payload["rows"]}
+
+
 def _make_backend(name: str, model: str, keepalive: str):
     if name == "mock":
         return MockSpecialistBackend()
@@ -158,27 +163,37 @@ def _prompt_row(contract: str, input_code: str, backend_name: str, model: str, k
 def _runtime_row(contract: str, input_code: str, backend_name: str, model: str, keepalive: str) -> dict[str, Any]:
     backend = _make_backend(backend_name, model, keepalive)
     result = backend.run(SpecialistRequest(contract=contract, input_code=input_code, route_confidence=1.0))
-    spec = get_contract_spec(contract)
-    threshold = spec.confidence_threshold if spec else None
-    threshold_passed = bool(
-        threshold is not None
-        and result.answer_confidence is not None
-        and result.answer_confidence >= threshold
-    )
-    covered = bool(result.generated_code is not None and result.verified and threshold_passed)
-    return {
+    return _runtime_row_from_payload(contract, {
         "generated_code": result.generated_code,
         "syntax_valid": result.syntax_valid,
         "required_construct_present": result.contract_marker_present,
         "passed": result.verified,
-        "covered": covered,
-        "fallback": not covered,
+        "covered": result.generated_code is not None,
+        "fallback": False,
         "answer_confidence": result.answer_confidence,
-        "threshold": threshold,
-        "control_action": "accepted" if covered else "fallback",
+        "threshold": None,
+        "control_action": result.control_action,
         "notes": result.notes,
         "details": result.details,
         "backend": backend.__class__.__name__,
+    })
+
+
+def _runtime_row_from_payload(contract: str, payload: dict[str, Any]) -> dict[str, Any]:
+    spec = get_contract_spec(contract)
+    threshold = spec.confidence_threshold if spec else None
+    threshold_passed = bool(
+        threshold is not None
+        and payload.get("answer_confidence") is not None
+        and payload["answer_confidence"] >= threshold
+    )
+    covered = bool(payload.get("generated_code") is not None and payload.get("passed") and threshold_passed)
+    return {
+        **payload,
+        "covered": covered,
+        "fallback": not covered,
+        "threshold": threshold,
+        "control_action": "accepted" if covered else "fallback",
     }
 
 
@@ -190,9 +205,11 @@ def main() -> None:
     parser.add_argument("--backend", choices=["mock", "ollama"], default=None)
     parser.add_argument("--ollama-model", default="llama3.1:latest")
     parser.add_argument("--ollama-keepalive", default="5m")
+    parser.add_argument("--reuse-from", type=Path, default=None)
     args = parser.parse_args()
 
     rows = _load_rows(args.input)
+    reused = _load_summary_rows(args.reuse_from) if args.reuse_from else None
     results = []
     for row in rows:
         contract = row["contract"]
@@ -203,8 +220,11 @@ def main() -> None:
             backend_name = args.backend or "ollama"
             payload = _prompt_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive)
         else:
-            backend_name = args.backend or "ollama"
-            payload = _runtime_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive)
+            if reused is not None and row["id"] in reused:
+                payload = _runtime_row_from_payload(contract, reused[row["id"]])
+            else:
+                backend_name = args.backend or "ollama"
+                payload = _runtime_row(contract, input_code, backend_name, args.ollama_model, args.ollama_keepalive)
         results.append({"id": row["id"], "contract": contract, "prompt": row.get("prompt"), **payload})
 
     summary = _summarize(args.arm, results)

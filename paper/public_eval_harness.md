@@ -61,6 +61,13 @@ Purpose:
 
 The full structured runtime for the contract.
 
+For the current local public harness, the fair comparison path is:
+
+- generate one candidate for `prompt_only`
+- apply runtime gating to that same candidate for `runtime_gated`
+
+This avoids conflating gating with a second stochastic model sample.
+
 Properties:
 
 - detect / route / execute / verify / gate / compose
