@@ -1,38 +1,48 @@
 # Lumina Micro
 
-This directory is a runnable standalone-repo candidate for the current Lumina micro-specialist work.
+Lumina Micro is a narrow, verifier-backed local code transformation system.
 
-It is the distilled surface only:
+It is not a general coding agent and it is not presented here as a universal specialist-routing architecture. The current claim is much tighter:
 
-- 3 frozen JavaScript micro-specialists
-- local runtime
-- paper and audit docs
-- demo artifacts
+> For small JavaScript refactor contracts, verifier-backed specialists and confidence-gated acceptance can produce high-precision local transformations.
 
-## What it proves
+## Current contribution
 
-This repo candidate supports a narrow claim:
+This repo demonstrates three things:
 
-> A verifier-backed local code transformation runtime where narrow contract specialists improve pass rates and confidence-gated acceptance enables high-precision rewrites.
+- narrow JavaScript refactor contracts can be defined with executable verifiers
+- a local runtime can detect, route, verify, gate, and compose those transforms
+- persisted research confidence heads can be compared against runtime heuristics on the same public eval surface
 
-## What is included
+Promoted contracts:
 
-- `lumina_micro/`
-  - local runtime package
-  - contract routers
-  - verifiers
-  - demo entrypoints
-- `paper/`
-  - research note
-  - methods appendix
-  - results table
-  - case gallery
-- `examples/`
-  - sample input
-- `artifacts/`
-  - captured demo and benchmark outputs
-- `tools/`
-  - shell entrypoints
+- `js_array_loop_to_map`
+- `js_reduce_accumulator_refactor`
+- `js_reduce_object_index_builder`
+
+## What this is
+
+- a runnable local refactoring runtime
+- a research artifact with methods, results, and case analysis
+- a public comparison surface for:
+  - deterministic rewrite only
+  - prompt-only generation
+  - verifier-gated runtime
+
+## What this is not
+
+- not a claim of broad JavaScript autonomy
+- not a claim that learned specialists beat deterministic rewriting everywhere
+- not a finished shared-base adapter deployment
+- not evidence of universal confidence across tasks
+
+## Strongest current external claim
+
+The most defensible way to describe the repo today is:
+
+> A verifier-backed local code transformation runtime where narrow contract specialists improve pass rates on exact refactor tasks, and selective acceptance improves precision relative to prompt-only generation.
+
+For the current public eval slice, deterministic rewriting remains a strong baseline. The runtime’s clearest value is controlled acceptance and fallback, not broad superiority over every simpler baseline.
 
 ## Fastest commands
 
@@ -64,25 +74,37 @@ LUMINA_MICRO_COLD_FIRST=1 \
 bash tools/run_bench_demo.sh
 ```
 
-Public eval scaffolding:
+Public eval:
 
 ```bash
 bash tools/run_public_eval_builder.sh
 LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_prompt.sh
 LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
 bash tools/run_public_eval_aggregate.sh
+```
+
+Confidence-source comparison:
+
+```bash
+LUMINA_MICRO_EVAL_BACKEND=ollama \
 bash tools/run_public_eval_compare_confidence.sh
+```
+
+Object-index transfer calibration:
+
+```bash
+LUMINA_MICRO_EVAL_BACKEND=ollama \
 bash tools/run_object_index_transfer_calibration.sh
+
+LUMINA_MICRO_EVAL_BACKEND=ollama \
 bash tools/run_public_eval_compare_calibrated.sh
 ```
 
 `run_object_index_transfer_calibration.sh` fits the local object-index transfer calibrator. Run it before `run_public_eval_compare_calibrated.sh`.
 
-For plumbing checks only, you can set `LUMINA_MICRO_EVAL_BACKEND=mock` for the prompt/runtime commands. Public comparisons should use the Ollama path.
+## Confidence-provider seam
 
-The current public comparison slice is `examples/public_eval_v2.jsonl`. The older `public_eval_v1.jsonl` remains an easy smoke slice.
-
-You can also swap the runtime confidence source without changing the eval matrix:
+The runtime can hold the eval matrix fixed while swapping confidence sources:
 
 ```bash
 LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic
@@ -92,46 +114,45 @@ LUMINA_MICRO_CONFIDENCE_PROVIDER=probe_bundle \
 LUMINA_MICRO_CONFIDENCE_MODEL=artifacts/research_heads/js_reduce_object_index_builder_confidence_probe.pt
 ```
 
-The `linear` path is the first file-backed hook for swapping persisted research heads into the same public eval surface. The shipped example model is only a schema/example, not a promoted research head.
+Current state:
 
-Only `js_reduce_object_index_builder` currently has a real persisted research head wired in. Other contracts still fall back to heuristic confidence in the standalone runtime.
+- `linear` is a schema/example path
+- `probe_bundle` is real for `js_reduce_object_index_builder`
+- the raw persisted head does not transfer cleanly to the local Ollama runtime by default
+- the repo now includes a transfer-calibration path for that mismatch
 
-## Important limitation
+## Main limitation
 
-This is a real runnable standalone candidate, but it still preserves one architectural limitation from the current project:
+The local runtime still uses a single Ollama backend.
 
-- the local backend uses a single Ollama model
-- it is shaped like a shared-base system
-- it is not yet true adapter-swapping deployment
+That means:
 
-## Local prerequisites
+- the interface is shaped like a shared-base specialist system
+- the deployment is not yet true adapter swapping
 
-- Python `3.11+`
-- Node.js on `PATH`
-- Ollama only if you want the local model path
+This matters because the runtime result and the research result are related, but not identical.
 
-Installable package metadata now exists via:
-
-```bash
-python -m pip install -e .
-```
-
-## Repo status
-
-This repo is shareable now, with one important boundary:
-
-- the research claim is about narrow verifier-backed specialists and selective acceptance
-- the local runtime is real and runnable
-- the local backend still uses one Ollama model rather than true adapter swapping
-
-## Best audit path
+## Best read order
 
 1. `paper/research_note.md`
 2. `paper/results_table.md`
 3. `paper/appendix_methods.md`
 4. `paper/case_gallery.md`
 5. `paper/public_eval_harness.md`
+6. `paper/positioning.md`
+
+## Local prerequisites
+
+- Python `3.11+`
+- Node.js on `PATH`
+- Ollama for local model execution
+
+Install:
+
+```bash
+python -m pip install -e .
+```
 
 ## License
 
-This repo is released under the MIT License. See `LICENSE`.
+MIT. See `LICENSE`.

@@ -1,22 +1,29 @@
-# Lumina Micro Demo Paper
+# Paper Notes
 
-This directory contains the current research note for the micro-specialist work.
+This directory holds the technical-report surface for Lumina Micro.
 
-Primary document:
+Read in this order:
 
-- `research_note.md`
+1. `research_note.md`
+   - problem framing
+   - method
+   - frozen results
+   - public comparison surface
+2. `results_table.md`
+   - compact metrics summary
+   - public eval snapshot
+   - persisted-head transfer result
+3. `appendix_methods.md`
+   - split construction
+   - verifier details
+   - threshold semantics
+4. `case_gallery.md`
+   - accepted and rejected examples
+   - public eval failures
+   - transfer-calibration example
+5. `public_eval_harness.md`
+   - exact public comparison shape
+6. `positioning.md`
+   - how to present the repo without overclaiming
 
-Supporting audit documents:
-
-- `appendix_methods.md`
-- `results_table.md`
-- `case_gallery.md`
-- `public_eval_harness.md`
-
-This note is intentionally scoped as a technical report, not a polished publication draft. It records:
-
-- the problem framing
-- the contract-first method
-- the frozen results
-- the local demo runtime result
-- the limits of the current claim
+This is a technical report, not a publication draft. The point is auditability and claim discipline.
