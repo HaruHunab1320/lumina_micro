@@ -71,6 +71,7 @@ bash tools/run_public_eval_builder.sh
 LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_prompt.sh
 LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
 bash tools/run_public_eval_aggregate.sh
+bash tools/run_public_eval_compare_confidence.sh
 ```
 
 For plumbing checks only, you can set `LUMINA_MICRO_EVAL_BACKEND=mock` for the prompt/runtime commands. Public comparisons should use the Ollama path.

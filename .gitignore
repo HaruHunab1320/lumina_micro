@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 artifacts/public_eval_*.json
 artifacts/public_eval_*.md
+artifacts/runtime_confidence_compare_*.json
+artifacts/runtime_confidence_compare_*.md
