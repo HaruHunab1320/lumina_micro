@@ -4,3 +4,6 @@ artifacts/public_eval_*.json
 artifacts/public_eval_*.md
 artifacts/runtime_confidence_compare_*.json
 artifacts/runtime_confidence_compare_*.md
+artifacts/object_index_transfer_*.json
+artifacts/object_index_transfer_*.md
+artifacts/research_heads/*transfer_calibrator*.json

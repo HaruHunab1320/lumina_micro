@@ -407,6 +407,32 @@ class ProbeBundleConfidenceProvider:
             return self._torch.sigmoid(logit).item()
 
 
+
+class CalibratedProbeBundleConfidenceProvider:
+    def __init__(self, path: str | Path, fallback: ConfidenceProvider | None = None) -> None:
+        self.path = Path(path)
+        self.payload = json.loads(self.path.read_text(encoding='utf-8'))
+        self.contract = self.payload['contract']
+        base_path = Path(self.payload['base_probe_model'])
+        if not base_path.is_absolute():
+            base_path = self.path.parent / base_path
+        self.base_provider = ProbeBundleConfidenceProvider(base_path, fallback=fallback)
+        self.heuristic_provider = HeuristicConfidenceProvider()
+        self.fallback = fallback or HeuristicConfidenceProvider()
+        weights = self.payload.get('weights', {})
+        self.bias = float(self.payload.get('bias', 0.0))
+        self.w_probe = float(weights.get('probe_score', 0.0))
+        self.w_heur = float(weights.get('heuristic_score', 0.0))
+
+    def score(self, contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
+        if contract != self.contract:
+            return self.fallback.score(contract, route_confidence, row, candidate, verdict)
+        probe_score = self.base_provider.score(contract, route_confidence, row, candidate, verdict)
+        heur_score = self.heuristic_provider.score(contract, route_confidence, row, candidate, verdict)
+        logit = self.bias + self.w_probe * probe_score + self.w_heur * heur_score
+        return 1.0 / (1.0 + math.exp(-logit))
+
+
 def build_confidence_provider(kind: str = 'heuristic', model_path: str | None = None) -> ConfidenceProvider:
     if kind == 'heuristic':
         return HeuristicConfidenceProvider()
@@ -418,6 +444,10 @@ def build_confidence_provider(kind: str = 'heuristic', model_path: str | None = 
         if not model_path:
             raise ValueError('confidence model path is required for probe_bundle provider')
         return ProbeBundleConfidenceProvider(model_path)
+    if kind == 'probe_bundle_calibrated':
+        if not model_path:
+            raise ValueError('confidence model path is required for probe_bundle_calibrated provider')
+        return CalibratedProbeBundleConfidenceProvider(model_path)
     raise ValueError(f'Unsupported confidence provider: {kind}')
 
 

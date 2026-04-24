@@ -24,7 +24,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Rescore an existing public-eval prompt payload with a different confidence provider.")
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--confidence-provider", choices=["heuristic", "linear", "probe_bundle"], required=True)
+    parser.add_argument("--confidence-provider", choices=["heuristic", "linear", "probe_bundle", "probe_bundle_calibrated"], required=True)
     parser.add_argument("--confidence-model", default=None)
     args = parser.parse_args()
 
