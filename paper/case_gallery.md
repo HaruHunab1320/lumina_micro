@@ -1,6 +1,7 @@
 # Case Gallery
 
-This gallery gives concrete accepted and rejected examples for the three frozen contracts.
+This gallery gives concrete accepted and rejected examples for the three frozen
+contracts.
 
 The goal is not breadth. The goal is to make the verifier behavior legible.
 
@@ -82,7 +83,8 @@ Why rejected:
 - syntax valid: `true`
 - uses `.reduce`: `true`
 - tests passed: `false`
-- reason: missing expected output binding (`totalAge` is undefined in verifier execution)
+- reason: missing expected output binding (`totalAge` is undefined in verifier
+  execution)
 
 ## 3. `js_reduce_object_index_builder`
 
@@ -129,11 +131,13 @@ Why rejected:
 - syntax valid: `true`
 - uses `.reduce`: `true`
 - tests passed: `false`
-- reason: the contract requires preserving the original item as the value; this candidate drops fields and changes value semantics
+- reason: the contract requires preserving the original item as the value; this
+  candidate drops fields and changes value semantics
 
 ## 4. `public_eval_v2` examples
 
-These examples come from the current public comparison slice rather than the frozen historical runs.
+These examples come from the current public comparison slice rather than the frozen
+historical runs.
 
 ### A. Prompt-only failure on accumulator reduce
 
@@ -215,7 +219,8 @@ It is more specific:
 - incomplete reduce block body
 - subtle semantic drift while still looking structurally plausible
 
-That is exactly why the verifier-backed contract is necessary. Textual plausibility is not enough.
+That is exactly why the verifier-backed contract is necessary. Textual plausibility is
+not enough.
 
 ## 6. Transfer-calibration example (`js_reduce_object_index_builder`)
 
@@ -237,4 +242,5 @@ Why this matters:
 
 - the candidate itself is not changing
 - only the confidence source changes
-- the transfer calibrator is correcting a runtime-distribution mismatch, not a generation error
+- the transfer calibrator is correcting a runtime-distribution mismatch, not a
+  generation error

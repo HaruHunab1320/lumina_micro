@@ -2,9 +2,12 @@
 
 This document defines the next public comparison surface for Lumina Micro.
 
-The goal is not to broaden the claim. The goal is to make the current narrow claim auditable:
+The goal is not to broaden the claim. The goal is to make the current narrow claim
+auditable:
 
-> For small, verifier-backed JavaScript refactor contracts, a structured runtime can be compared directly against deterministic rewriting and plain single-model prompting on held-out inputs.
+> For small, verifier-backed JavaScript refactor contracts, a structured runtime can be
+> compared directly against deterministic rewriting and plain single-model prompting on
+> held-out inputs.
 
 ## 1. Purpose
 
@@ -15,11 +18,13 @@ The current repo already contains:
 - a local runtime
 - research notes and frozen specialist results
 
-What is still missing is a public, side-by-side evaluation harness that answers a simple question:
+What is still missing is a public, side-by-side evaluation harness that answers a simple
+question:
 
 - what does the structured verifier-gated runtime buy us over simpler baselines?
 
-This harness should compare three approaches on the same held-out inputs and with the same verifier.
+This harness should compare three approaches on the same held-out inputs and with the
+same verifier.
 
 ## 2. Comparison arms
 
@@ -38,17 +43,20 @@ Properties:
 Purpose:
 
 - establishes what a pure programmatic transformation can do on the same slice
-- prevents the runtime demo from being misread as pure learned generation when deterministic rewriting is doing some of the work
+- prevents the runtime demo from being misread as pure learned generation when
+  deterministic rewriting is doing some of the work
 
 ### B. `prompt_only`
 
-A single-model prompt path with no verifier-gated routing policy beyond final measurement.
+A single-model prompt path with no verifier-gated routing policy beyond final
+measurement.
 
 Properties:
 
 - one general local model
 - contract prompt only
-- output postprocessing limited to extraction/normalization required to score a single candidate
+- output postprocessing limited to extraction/normalization required to score a single
+  candidate
 - no builder fallback inside the answer path
 - no confidence-based acceptance policy inside the answer path
 
@@ -106,7 +114,8 @@ Recommended split naming:
 
 - `public_eval_v1.jsonl`
 
-If a contract already depends on an adversarial split for meaningful negatives, the public eval should use that adversarial family rather than the easy validation slice.
+If a contract already depends on an adversarial split for meaningful negatives, the
+public eval should use that adversarial family rather than the easy validation slice.
 
 Current expected basis:
 
@@ -168,7 +177,8 @@ Report all metrics per contract and per arm.
 
 ### Selective-control metrics
 
-These apply primarily to `runtime_gated`, but should be present in the results surface so differences are explicit.
+These apply primarily to `runtime_gated`, but should be present in the results surface
+so differences are explicit.
 
 - `coverage`
 - `selective_accuracy`
@@ -184,7 +194,8 @@ If a learned or heuristic confidence score is used, report:
 - `ece`
 - `brier`
 
-For `builder_only`, confidence fields should be `n/a` unless a meaningful score is explicitly defined.
+For `builder_only`, confidence fields should be `n/a` unless a meaningful score is
+explicitly defined.
 
 ## 8. Public result interpretation
 
@@ -192,7 +203,8 @@ The public harness is meant to answer these questions:
 
 1. Does the deterministic builder already solve most of the contract?
 2. Does plain prompt-only generation handle the contract well enough without structure?
-3. Does the verifier-gated runtime improve precision, pass rate, or safety relative to those two baselines?
+3. Does the verifier-gated runtime improve precision, pass rate, or safety relative to
+   those two baselines?
 
 The right claim shape after this comparison is still narrow.
 
@@ -222,7 +234,8 @@ A public comparison release should include:
 
 The public eval matrix now has an explicit confidence-provider seam.
 
-That seam exists so the comparison surface can stay fixed while the runtime internals improve:
+That seam exists so the comparison surface can stay fixed while the runtime internals
+improve:
 
 - current local runtime default: heuristic confidence
 - next upgrade: file-backed learned confidence heads
@@ -232,16 +245,21 @@ The immediate public requirement is simple:
 
 - changing the confidence source must not change the eval harness shape
 - the same held-out rows and the same three arms must still run
-- any claim improvement should come from swapping a better confidence provider into the same matrix
+- any claim improvement should come from swapping a better confidence provider into the
+  same matrix
 
 Current command-level knobs:
 
 - `LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic|linear|probe_bundle`
 - `LUMINA_MICRO_CONFIDENCE_MODEL=/path/to/model.json`
 
-The repository includes `artifacts/example_linear_confidence_model.json` as a schema/example for the file-backed path.
+The repository includes `artifacts/example_linear_confidence_model.json` as a
+schema/example for the file-backed path.
 
-The first concrete standalone wiring target is the persisted `js_reduce_object_index_builder` probe bundle. When that provider is selected, unsupported contracts should fall back to heuristic confidence rather than silently disappearing from the matrix.
+The first concrete standalone wiring target is the persisted
+`js_reduce_object_index_builder` probe bundle. When that provider is selected,
+unsupported contracts should fall back to heuristic confidence rather than silently
+disappearing from the matrix.
 
 ## 11. Suggested command surface
 
@@ -254,4 +272,5 @@ LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
 bash tools/run_public_eval_aggregate.sh
 ```
 
-The important point is not the filenames. The important point is that the comparison is explicit, reproducible, and side-by-side.
+The important point is not the filenames. The important point is that the comparison is
+explicit, reproducible, and side-by-side.

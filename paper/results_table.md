@@ -31,8 +31,7 @@ They mean:
 The clearest example is:
 
 - `js_reduce_object_index_builder`
-  - selective accuracy: `1.000`
-  - coverage: `0.414`
+- selective accuracy: `1.000` - coverage: `0.414`
 
 That should be described as:
 
@@ -60,11 +59,13 @@ This validates the local runtime path, not true adapter-swapping deployment.
 
 ## E. Public comparison snapshot (`public_eval_v2`)
 
-`public_eval_v2` is the first public slice that creates some separation between deterministic rewriting, prompt-only generation, and verifier-gated acceptance.
+`public_eval_v2` is the first public slice that creates some separation between
+deterministic rewriting, prompt-only generation, and verifier-gated acceptance.
 
 Important boundary:
 
-- `runtime_gated` now applies thresholding to the same candidate emitted by `prompt_only`
+- `runtime_gated` now applies thresholding to the same candidate emitted by
+  `prompt_only`
 - it is not allowed to take a second stochastic model sample
 - this makes the comparison fairer and easier to interpret
 
@@ -85,7 +86,8 @@ What this snapshot supports:
 - deterministic contract logic remains a very strong baseline on these narrow tasks
 - prompt-only generation is meaningfully weaker on some reduce/object-index rows
 - runtime gating does not improve overall accuracy on this slice
-- but it does convert lower-precision prompt behavior into high-precision selective acceptance on the rows it keeps
+- but it does convert lower-precision prompt behavior into high-precision selective
+  acceptance on the rows it keeps
 
 What this snapshot does not support:
 
@@ -109,7 +111,8 @@ LUMINA_MICRO_EVAL_BACKEND=ollama bash tools/run_public_eval_runtime.sh
 bash tools/run_public_eval_aggregate.sh
 ```
 
-The comparison table remains the minimum surface needed to make the repo legible to an outside reader because it separates:
+The comparison table remains the minimum surface needed to make the repo legible to an
+outside reader because it separates:
 
 - deterministic contract logic
 - plain model prompting
@@ -119,7 +122,8 @@ The comparison table remains the minimum surface needed to make the repo legible
 
 This is the first explicit runtime-vs-research transfer result in the standalone repo.
 
-All three runtime arms below gate the same fixed `public_eval_v2` prompt candidates for `js_reduce_object_index_builder`.
+All three runtime arms below gate the same fixed `public_eval_v2` prompt candidates for
+`js_reduce_object_index_builder`.
 
 | Confidence source | Coverage | Selective accuracy | Overall accuracy |
 | --- | ---: | ---: | ---: |
@@ -129,6 +133,8 @@ All three runtime arms below gate the same fixed `public_eval_v2` prompt candida
 
 Interpretation:
 
-- the archived research head does not transfer cleanly to the local Ollama runtime by default
+- the archived research head does not transfer cleanly to the local Ollama runtime by
+  default
 - a small transfer calibrator restores the lost coverage on the current public slice
-- this is evidence for a viable adaptation path, not evidence that persisted heads are plug-and-play across runtime distributions
+- this is evidence for a viable adaptation path, not evidence that persisted heads are
+  plug-and-play across runtime distributions

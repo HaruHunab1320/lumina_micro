@@ -6,11 +6,14 @@ Use this repo as a narrow systems/research artifact.
 
 Best current description:
 
-> Lumina Micro is a verifier-backed local code transformation runtime for narrow JavaScript refactor contracts.
+> Lumina Micro is a verifier-backed local code transformation runtime for narrow
+> JavaScript refactor contracts.
 
 Slightly longer:
 
-> It detects specific refactor shapes, routes them to contract-specific specialists, verifies the rewrite with executable checks, and only accepts rewrites that clear a contract threshold.
+> It detects specific refactor shapes, routes them to contract-specific specialists,
+> verifies the rewrite with executable checks, and only accepts rewrites that clear a
+> contract threshold.
 
 ## What to emphasize
 
@@ -18,9 +21,7 @@ Slightly longer:
 - verification is central
 - confidence is contract-specific, not universal
 - the public eval matrix compares:
-  - deterministic rewrite only
-  - prompt-only generation
-  - verifier-gated runtime
+- deterministic rewrite only - prompt-only generation - verifier-gated runtime
 - persisted research heads can now be swapped into that matrix and evaluated explicitly
 
 ## What not to emphasize
@@ -39,7 +40,8 @@ What is clearly supported:
 - narrow refactor contracts are workable
 - verifier-gated acceptance is useful
 - prompt-only generation is weaker than deterministic rewriting on some held-out rows
-- transfer calibration is a viable path for adapting at least one persisted head to the local runtime
+- transfer calibration is a viable path for adapting at least one persisted head to the
+  local runtime
 
 What is not yet supported:
 
@@ -51,7 +53,8 @@ What is not yet supported:
 
 Use this if you need a short line:
 
-> A local verifier-backed refactoring runtime that uses narrow contract specialists and selective acceptance to keep only high-confidence rewrites.
+> A local verifier-backed refactoring runtime that uses narrow contract specialists and
+> selective acceptance to keep only high-confidence rewrites.
 
 ## Internal strategy summary
 

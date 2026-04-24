@@ -2,7 +2,8 @@
 
 ## Scope
 
-This appendix records the concrete experimental surface behind the three promoted JavaScript micro-specialists:
+This appendix records the concrete experimental surface behind the three promoted
+JavaScript micro-specialists:
 
 - `js_array_loop_to_map`
 - `js_reduce_accumulator_refactor`
@@ -36,7 +37,8 @@ The packaged local runtime uses:
 
 - Ollama backend with `llama3.1:latest`
 
-This is an important distinction. The local demo validates runtime shape, not the exact research deployment architecture.
+This is an important distinction. The local demo validates runtime shape, not the exact
+research deployment architecture.
 
 ## Dataset generation
 
@@ -123,13 +125,12 @@ Adversarial `hard_val_v2` / `probe_train_v2` pattern family:
 The intended separation is:
 
 - answer-model uplift:
-  - train on `train.jsonl`
-  - evaluate on `val.jsonl`
+- train on `train.jsonl` - evaluate on `val.jsonl`
 - confidence, when needed:
-  - train on `probe_train_v2.jsonl`
-  - validate and evaluate on `hard_val_v2.jsonl`
+- train on `probe_train_v2.jsonl` - validate and evaluate on `hard_val_v2.jsonl`
 
-This mattered especially for `reduce` and `object_index`, where early confidence runs failed because the evaluation slice contained no negatives.
+This mattered especially for `reduce` and `object_index`, where early confidence runs
+failed because the evaluation slice contained no negatives.
 
 ## Verifier definitions
 
@@ -143,8 +144,7 @@ All three verifiers use the same structure:
 
 1. parse candidate JavaScript with `node --check`
 2. require contract marker presence:
-   - `.map(` for the map contract
-   - `.reduce(` for both reduce contracts
+- `.map(` for the map contract - `.reduce(` for both reduce contracts
 3. run executable test cases in Node
 4. compare `actual` and `expected_output` by JSON equality
 
@@ -156,7 +156,8 @@ A candidate is counted as passing only if:
 
 ## Threshold selection
 
-Thresholds were not chosen as universal defaults. They were frozen per contract after threshold sweeps and stability runs.
+Thresholds were not chosen as universal defaults. They were frozen per contract after
+threshold sweeps and stability runs.
 
 Frozen thresholds:
 
@@ -168,7 +169,8 @@ Interpretation rule:
 
 - these are high-precision selective-accept thresholds
 - they should always be read together with coverage
-- a `1.000` selective accuracy result with low coverage means the system is conservative, not universally correct
+- a `1.000` selective accuracy result with low coverage means the system is
+  conservative, not universally correct
 
 ## Evaluation basis behind the frozen claims
 
