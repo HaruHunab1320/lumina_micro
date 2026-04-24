@@ -1,21 +1,41 @@
 # Lumina Micro
 
-Lumina Micro is a narrow, verifier-backed local code transformation system.
+Lumina Micro is a verifier-gated local refactoring runtime for narrow JavaScript
+contracts.
 
-It is not a general coding agent and it is not presented here as a universal
-specialist-routing architecture. The current claim is much tighter:
+It is designed around one idea:
+
+> detect → route → generate → verify → gate → compose
+
+The current claim is narrow on purpose:
 
 > For small JavaScript refactor contracts, verifier-backed specialists and
 > confidence-gated acceptance can produce high-precision local transformations.
 
-## Current contribution
+## What this is
 
-This repo demonstrates three things:
+- a local refactoring pipeline for exact JavaScript loop-rewrite contracts
+- a verifier-backed runtime that can accept or reject rewrites safely
+- a research artifact with a public eval matrix and transfer-calibration work
 
-- narrow JavaScript refactor contracts can be defined with executable verifiers
-- a local runtime can detect, route, verify, gate, and compose those transforms
-- persisted research confidence heads can be compared against runtime heuristics on the
-  same public eval surface
+## What this is not
+
+- not a general coding agent
+- not a claim that learned specialists beat deterministic rewriting everywhere
+- not a finished shared-base adapter runtime
+- not evidence of universal confidence across tasks
+
+## Pipeline
+
+![Lumina Micro pipeline](docs/assets/pipeline.svg)
+
+## 30-second demo
+
+![Terminal demo](docs/assets/terminal_demo.gif)
+
+The local runtime takes a normal refactor request, finds transformable spans,
+routes them to a contract, verifies the rewrite, and only keeps it if it clears
+the contract threshold.
 
 Promoted contracts:
 
@@ -23,35 +43,32 @@ Promoted contracts:
 - `js_reduce_accumulator_refactor`
 - `js_reduce_object_index_builder`
 
-## What this is
+## Eval snapshot
 
-- a runnable local refactoring runtime
-- a research artifact with methods, results, and case analysis
-- a public comparison surface for:
-- deterministic rewrite only - prompt-only generation - verifier-gated runtime
+Current public comparison surface: `examples/public_eval_v2.jsonl`
 
-## What this is not
+| Contract | Builder pass | Prompt pass | Runtime coverage | Runtime selective acc |
+| --- | ---: | ---: | ---: | ---: |
+| `js_array_loop_to_map` | `1.000` | `1.000` | `1.000` | `1.000` |
+| `js_reduce_accumulator_refactor` | `1.000` | `0.500` | `0.500` | `1.000` |
+| `js_reduce_object_index_builder` | `1.000` | `0.750` | `0.750` | `1.000` |
 
-- not a claim of broad JavaScript autonomy
-- not a claim that learned specialists beat deterministic rewriting everywhere
-- not a finished shared-base adapter deployment
-- not evidence of universal confidence across tasks
+Interpretation:
 
-## Strongest current external claim
+- deterministic rewriting is a strong baseline on this slice
+- prompt-only generation is weaker on some reduce/object-index rows
+- the runtime’s clearest value is high-precision selective acceptance, not broad
+  superiority over deterministic rewriting
 
-The most defensible way to describe the repo today is:
+## Strongest current claim
 
-> A verifier-backed local code transformation runtime where narrow contract specialists
-> improve pass rates on exact refactor tasks, and selective acceptance improves
-> precision relative to prompt-only generation.
+The most defensible way to describe this repo today is:
 
-For the current public eval slice, deterministic rewriting remains a strong baseline.
-The runtime’s clearest value is controlled acceptance and fallback, not broad
-superiority over every simpler baseline.
+> A verifier-backed local code transformation runtime where narrow contract
+> specialists improve pass rates on exact refactor tasks, and selective
+> acceptance improves precision relative to prompt-only generation.
 
 ## Fastest commands
-
-From this directory:
 
 Mock demo:
 
@@ -110,7 +127,7 @@ calibrator. Run it before `run_public_eval_compare_calibrated.sh`.
 
 ## Confidence-provider seam
 
-The runtime can hold the eval matrix fixed while swapping confidence sources:
+The eval matrix stays fixed while confidence changes:
 
 ```bash
 LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic
@@ -124,9 +141,8 @@ Current state:
 
 - `linear` is a schema/example path
 - `probe_bundle` is real for `js_reduce_object_index_builder`
-- the raw persisted head does not transfer cleanly to the local Ollama runtime by
-  default
-- the repo now includes a transfer-calibration path for that mismatch
+- the raw persisted head does not transfer cleanly to the local Ollama runtime
+- the repo includes a transfer-calibration path for that mismatch
 
 ## Main limitation
 
@@ -136,9 +152,6 @@ That means:
 
 - the interface is shaped like a shared-base specialist system
 - the deployment is not yet true adapter swapping
-
-This matters because the runtime result and the research result are related, but not
-identical.
 
 ## Best read order
 

@@ -1,0 +1,62 @@
+<svg width="1200" height="320" viewBox="0 0 1200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="320" rx="24" fill="#0B1020"/>
+  <text x="48" y="56" fill="#F8FAFC" font-family="Menlo, Monaco, Consolas, monospace" font-size="28" font-weight="700">Lumina Micro Pipeline</text>
+  <text x="48" y="88" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="16">detect → route → generate → verify → gate → compose</text>
+
+  <g transform="translate(42 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Detect</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">find loop-shaped</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">refactor spans</text>
+  </g>
+
+  <g transform="translate(230 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Route</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">pick contract</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">and threshold</text>
+  </g>
+
+  <g transform="translate(418 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Generate</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">prompt specialist</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">or builder</text>
+  </g>
+
+  <g transform="translate(606 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#22C55E" stroke-width="2.5"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Verify</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">syntax + construct</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">+ behavior tests</text>
+  </g>
+
+  <g transform="translate(794 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#F59E0B" stroke-width="2.5"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Gate</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">accept only if</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">confidence clears</text>
+  </g>
+
+  <g transform="translate(982 132)">
+    <rect width="160" height="112" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+    <text x="20" y="36" fill="#E2E8F0" font-family="Menlo, Monaco, Consolas, monospace" font-size="18" font-weight="700">Compose</text>
+    <text x="20" y="64" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">merge accepted</text>
+    <text x="20" y="84" fill="#94A3B8" font-family="Menlo, Monaco, Consolas, monospace" font-size="14">rewrites, fallback</text>
+  </g>
+
+  <g stroke="#475569" stroke-width="3" stroke-linecap="round">
+    <path d="M204 188H226"/>
+    <path d="M392 188H414"/>
+    <path d="M580 188H602"/>
+    <path d="M768 188H790"/>
+    <path d="M956 188H978"/>
+  </g>
+  <g fill="#475569">
+    <path d="M226 188l-10 -8v16z"/>
+    <path d="M414 188l-10 -8v16z"/>
+    <path d="M602 188l-10 -8v16z"/>
+    <path d="M790 188l-10 -8v16z"/>
+    <path d="M978 188l-10 -8v16z"/>
+  </g>
+</svg>
