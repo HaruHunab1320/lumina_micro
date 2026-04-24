@@ -216,3 +216,25 @@ It is more specific:
 - subtle semantic drift while still looking structurally plausible
 
 That is exactly why the verifier-backed contract is necessary. Textual plausibility is not enough.
+
+## 6. Transfer-calibration example (`js_reduce_object_index_builder`)
+
+Row: `idx_i` on the fixed public slice.
+
+Accepted candidate:
+
+```js
+const invoicesByOwnerRegion = invoices.reduce((acc, invoice) => ({...acc, [`${invoice.customer.account.owner.email.trim().toLowerCase()}:${invoice.region.code}`]: invoice}), {});
+```
+
+Observed confidence on the same candidate:
+
+- heuristic runtime score: accepted above threshold
+- raw persisted probe: scored below threshold and rejected
+- transfer-calibrated probe: accepted above threshold
+
+Why this matters:
+
+- the candidate itself is not changing
+- only the confidence source changes
+- the transfer calibrator is correcting a runtime-distribution mismatch, not a generation error

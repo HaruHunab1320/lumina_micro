@@ -114,3 +114,21 @@ The comparison table remains the minimum surface needed to make the repo legible
 - deterministic contract logic
 - plain model prompting
 - structured verifier-gated runtime behavior
+
+## G. Persisted-head transfer calibration (`js_reduce_object_index_builder`)
+
+This is the first explicit runtime-vs-research transfer result in the standalone repo.
+
+All three runtime arms below gate the same fixed `public_eval_v2` prompt candidates for `js_reduce_object_index_builder`.
+
+| Confidence source | Coverage | Selective accuracy | Overall accuracy |
+| --- | ---: | ---: | ---: |
+| heuristic runtime score | `0.750` | `1.000` | `0.750` |
+| raw persisted probe bundle | `0.250` | `1.000` | `0.250` |
+| transfer-calibrated probe bundle | `0.750` | `1.000` | `0.750` |
+
+Interpretation:
+
+- the archived research head does not transfer cleanly to the local Ollama runtime by default
+- a small transfer calibrator restores the lost coverage on the current public slice
+- this is evidence for a viable adaptation path, not evidence that persisted heads are plug-and-play across runtime distributions

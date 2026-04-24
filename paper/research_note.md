@@ -168,6 +168,26 @@ What this public surface supports:
 
 That is a narrower but more defensible public claim than the earlier internal framing.
 
+### 4.5 Transfer calibration for persisted research heads
+
+The first persisted research head wired into the standalone runtime was the archived `js_reduce_object_index_builder` probe bundle. On the local Ollama public slice, that raw head did not transfer cleanly: it was stricter than the heuristic runtime score and reduced object-index coverage from `0.750` to `0.250` while keeping selective accuracy at `1.000`.
+
+We then fit a small transfer calibrator on a separate local object-index slice (`examples/object_index_transfer_v1.jsonl`) using the same Ollama prompt path. That calibrator combines the raw persisted probe score with the current heuristic runtime score and is then re-applied to the fixed public slice.
+
+Current object-index comparison on the fixed public slice:
+
+- heuristic runtime
+  - coverage: `0.750`
+  - selective accuracy: `1.000`
+- raw persisted probe
+  - coverage: `0.250`
+  - selective accuracy: `1.000`
+- transfer-calibrated probe
+  - coverage: `0.750`
+  - selective accuracy: `1.000`
+
+The important point is not that the persisted head transfers cleanly as-is. It does not. The important point is that the standalone runtime now has a concrete path for adapting archived research heads to the local Ollama execution distribution without changing the public eval matrix itself.
+
 ## 5. Main Findings
 
 ### 5.1 What is validated
@@ -202,7 +222,7 @@ The core lesson is that the unit of progress is not “a specialist model.” It
 
 - The current specialist library is small: only three promoted contracts.
 - The data is heavily synthetic and contract-shaped.
-- The local runtime still uses heuristic confidence in the demo backend rather than loading the persisted research heads directly.
+- The local runtime now supports loading one persisted research head directly (`js_reduce_object_index_builder`), but that head requires local transfer calibration on the Ollama path; transfer is not automatic.
 - The local runtime is adapter-shaped in interface only; it is not yet a true adapter-swapping implementation.
 - The evidence is currently limited to narrow JavaScript refactoring tasks.
 
