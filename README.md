@@ -29,9 +29,42 @@ The current claim is narrow on purpose:
 
 ![Lumina Micro pipeline](docs/assets/pipeline.svg)
 
-## 30-second demo
+## Example
 
-![Terminal demo](docs/assets/terminal_demo.gif)
+Prompt:
+
+```text
+Refactor this JavaScript into more idiomatic functional code.
+```
+
+Input:
+
+```js
+const names = [];
+for (const user of users) {
+  names.push(user.name.toUpperCase());
+}
+
+let totalAge = 0;
+for (const user of users) {
+  totalAge += user.age;
+}
+
+const usersById = {};
+for (const user of users) {
+  usersById[user.id] = user;
+}
+```
+
+Output:
+
+```js
+const names = users.map(user => user.name.toUpperCase());
+
+let totalAge = users.reduce((a, b) => a + b.age, 0);
+
+const usersById = users.reduce((acc, user) => ({ ...acc, [user.id]: user }), {});
+```
 
 The local runtime takes a normal refactor request, finds transformable spans,
 routes them to a contract, verifies the rewrite, and only keeps it if it clears
