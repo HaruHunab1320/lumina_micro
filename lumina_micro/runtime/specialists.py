@@ -347,6 +347,66 @@ class LinearConfidenceProvider:
         return 1.0 / (1.0 + math.exp(-logit))
 
 
+class ProbeBundleConfidenceProvider:
+    def __init__(self, path: str | Path, fallback: ConfidenceProvider | None = None) -> None:
+        self.path = Path(path)
+        self.fallback = fallback or HeuristicConfidenceProvider()
+        self._loaded = False
+        self._supported_contract = None
+        self._torch = None
+        self._probe = None
+        self._mean = None
+        self._std = None
+        self.metadata = {}
+
+    def _load(self) -> None:
+        if self._loaded:
+            return
+        try:
+            import torch
+            from torch import nn
+        except Exception as exc:  # pragma: no cover - environment dependent
+            raise RuntimeError('torch is required for probe_bundle confidence provider') from exc
+
+        payload = torch.load(self.path, map_location='cpu')
+        input_dim = int(payload['input_dim'])
+        hidden_dim = int(payload.get('hidden_dim', 16))
+        class _ConfidenceProbe(nn.Module):
+            def __init__(self, input_dim: int, hidden_dim: int) -> None:
+                super().__init__()
+                self.net = nn.Sequential(
+                    nn.Linear(input_dim, hidden_dim),
+                    nn.ReLU(),
+                    nn.Linear(hidden_dim, 1),
+                )
+
+            def forward(self, x):
+                return self.net(x).squeeze(-1)
+
+        probe = _ConfidenceProbe(input_dim, hidden_dim)
+        probe.load_state_dict(payload['state_dict'])
+        probe.eval()
+
+        self._torch = torch
+        self._probe = probe
+        self._mean = payload['mean'].float()
+        self._std = payload['std'].float()
+        self.metadata = payload.get('metadata', {})
+        self._supported_contract = self.metadata.get('task_contract')
+        self._loaded = True
+
+    def score(self, contract: str, route_confidence: float, row: dict, candidate: str, verdict) -> float:
+        self._load()
+        if self._supported_contract and contract != self._supported_contract:
+            return self.fallback.score(contract, route_confidence, row, candidate, verdict)
+        features = _feature_vector(contract, row, candidate, route_confidence, verdict)
+        x = self._torch.tensor(features, dtype=self._torch.float32)
+        x = (x - self._mean) / self._std
+        with self._torch.no_grad():
+            logit = self._probe(x.unsqueeze(0))[0]
+            return self._torch.sigmoid(logit).item()
+
+
 def build_confidence_provider(kind: str = 'heuristic', model_path: str | None = None) -> ConfidenceProvider:
     if kind == 'heuristic':
         return HeuristicConfidenceProvider()
@@ -354,6 +414,10 @@ def build_confidence_provider(kind: str = 'heuristic', model_path: str | None = 
         if not model_path:
             raise ValueError('confidence model path is required for linear provider')
         return LinearConfidenceProvider.from_path(model_path)
+    if kind == 'probe_bundle':
+        if not model_path:
+            raise ValueError('confidence model path is required for probe_bundle provider')
+        return ProbeBundleConfidenceProvider(model_path)
     raise ValueError(f'Unsupported confidence provider: {kind}')
 
 

@@ -207,7 +207,7 @@ def main() -> None:
     parser.add_argument("--backend", choices=["mock", "ollama"], default=None)
     parser.add_argument("--ollama-model", default="llama3.1:latest")
     parser.add_argument("--ollama-keepalive", default="5m")
-    parser.add_argument("--confidence-provider", choices=["heuristic", "linear"], default="heuristic")
+    parser.add_argument("--confidence-provider", choices=["heuristic", "linear", "probe_bundle"], default="heuristic")
     parser.add_argument("--confidence-model", default=None)
     parser.add_argument("--reuse-from", type=Path, default=None)
     args = parser.parse_args()

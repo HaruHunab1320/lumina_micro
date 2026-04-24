@@ -83,9 +83,13 @@ You can also swap the runtime confidence source without changing the eval matrix
 LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic
 LUMINA_MICRO_CONFIDENCE_PROVIDER=linear \
 LUMINA_MICRO_CONFIDENCE_MODEL=artifacts/example_linear_confidence_model.json
+LUMINA_MICRO_CONFIDENCE_PROVIDER=probe_bundle \
+LUMINA_MICRO_CONFIDENCE_MODEL=artifacts/research_heads/js_reduce_object_index_builder_confidence_probe.pt
 ```
 
 The `linear` path is the first file-backed hook for swapping persisted research heads into the same public eval surface. The shipped example model is only a schema/example, not a promoted research head.
+
+Only `js_reduce_object_index_builder` currently has a real persisted research head wired in. Other contracts still fall back to heuristic confidence in the standalone runtime.
 
 ## Important limitation
 

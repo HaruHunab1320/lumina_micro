@@ -236,10 +236,12 @@ The immediate public requirement is simple:
 
 Current command-level knobs:
 
-- `LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic|linear`
+- `LUMINA_MICRO_CONFIDENCE_PROVIDER=heuristic|linear|probe_bundle`
 - `LUMINA_MICRO_CONFIDENCE_MODEL=/path/to/model.json`
 
 The repository includes `artifacts/example_linear_confidence_model.json` as a schema/example for the file-backed path.
+
+The first concrete standalone wiring target is the persisted `js_reduce_object_index_builder` probe bundle. When that provider is selected, unsupported contracts should fall back to heuristic confidence rather than silently disappearing from the matrix.
 
 ## 11. Suggested command surface
 

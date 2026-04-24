@@ -1,0 +1,6 @@
+{
+  "contract": "js_reduce_object_index_builder",
+  "source_run": "lumina-micro-js-reduce-index-probe-v1-001",
+  "gcs_path": "gs://lumina-checkpoints-argos-2026/runs/lumina-micro-js-reduce-index-probe-v1-001/outputs_gen/js_reduce_object_index_builder_confidence_probe.pt",
+  "notes": "Persisted research confidence head exported from the archived micro-specialist run. This standalone repo uses it via the probe_bundle confidence provider; unsupported contracts fall back to heuristic confidence."
+}
